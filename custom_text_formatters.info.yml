@@ -1,0 +1,8 @@
+name: 'Custom Text Formatters'
+type: module
+description: 'A custom field formatter for text fields.'
+package: Custom
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:field
+  - text:text

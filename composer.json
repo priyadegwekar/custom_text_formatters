@@ -1,0 +1,8 @@
+{
+  "name": "custom/custom_text_formatters",
+  "description": "Provides custom text field formatters such as Slugify.",
+  "type": "drupal-module",
+  "require": {
+    "cocur/slugify": "^4.7"
+  }
+}

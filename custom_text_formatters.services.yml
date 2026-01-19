@@ -1,0 +1,3 @@
+services:
+  custom_text_formatters.slugify:
+    class: Drupal\custom_text_formatters\Service\SlugifyService

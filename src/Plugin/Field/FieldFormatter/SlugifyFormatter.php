@@ -4,6 +4,7 @@ namespace Drupal\custom_text_formatters\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\custom_text_formatters\Service\SlugifyService;
@@ -13,6 +14,7 @@ use Drupal\custom_text_formatters\Service\SlugifyService;
  *
  * @FieldFormatter(
  *   id = "custom_slugify_text",
+ *   label = @Translation("Slugify"),
  *   field_types = {
  *     "string",
  *     "string_long",
@@ -24,20 +26,84 @@ use Drupal\custom_text_formatters\Service\SlugifyService;
  */
 class SlugifyFormatter extends FormatterBase {
 
-  protected $slugifyService;
+  /**
+   * The slugify service.
+   *
+   * @var \Drupal\custom_text_formatters\Service\SlugifyService
+   */
+  protected SlugifyService $slugifyService;
 
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->slugifyService = $container->get('custom_text_formatters.slugify');
-    return $instance;
+  /**
+   * Constructs a SlugifyFormatter object.
+   *
+   * @param string $plugin_id
+   *   The plugin ID.
+   * @param mixed $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition.
+   * @param array $settings
+   *   The formatter settings.
+   * @param string $label
+   *   The field label.
+   * @param string $view_mode
+   *   The view mode.
+   * @param array $third_party_settings
+   *   Third-party settings.
+   * @param \Drupal\custom_text_formatters\Service\SlugifyService $slugify_service
+   *   The slugify service.
+   */
+  public function __construct(
+    string $plugin_id,
+    $plugin_definition,
+    FieldDefinitionInterface $field_definition,
+    array $settings,
+    string $label,
+    string $view_mode,
+    array $third_party_settings,
+    SlugifyService $slugify_service
+  ) {
+    parent::__construct(
+      $plugin_id,
+      $plugin_definition,
+      $field_definition,
+      $settings,
+      $label,
+      $view_mode,
+      $third_party_settings
+    );
+
+    $this->slugifyService = $slugify_service;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['label'],
+      $configuration['view_mode'],
+      $configuration['third_party_settings'],
+      $container->get('custom_text_formatters.slugify')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function defaultSettings() {
     return [
       'separator' => '-',
     ] + parent::defaultSettings();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     return [
       'separator' => [
@@ -50,6 +116,9 @@ class SlugifyFormatter extends FormatterBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function settingsSummary() {
     return [
       $this->t('Separator: @separator', [
@@ -58,6 +127,9 @@ class SlugifyFormatter extends FormatterBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
     $separator = $this->getSetting('separator');
